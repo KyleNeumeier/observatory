@@ -2,7 +2,7 @@
 
 Observatory is an earthquake investigation workspace built as an attributed extension of [God's Eye View](https://github.com/bilawalsidhu/gods-eye-view). It connects USGS events to nearby airports and mapped dams, replays historical sequences, produces evidence-linked briefings, and publishes a reproducible 2021–2025 analysis of subsequent nearby seismic activity.
 
-**[Open the public recorded demo](https://kyle-observatory.active-thyme-9428.chatgpt.site)** · [Architecture and data dictionary](observatory/docs/ARCHITECTURE.md) · [Sources and licensing](observatory/docs/SOURCES.md) · [Interview walkthrough](observatory/docs/WALKTHROUGH.md)
+**[Open the public recorded demo](https://kyle-observatory.kyleneumeier.chatgpt.site)** · [Architecture and data dictionary](observatory/docs/ARCHITECTURE.md) · [Sources and licensing](observatory/docs/SOURCES.md) · [Interview walkthrough](observatory/docs/WALKTHROUGH.md)
 
 ## What I added
 
