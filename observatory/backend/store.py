@@ -51,9 +51,9 @@ class Store:
 
     def mark(self, id, error=None):
         with self.connect() as conn:
-            conn.execute('''INSERT INTO feed_health(id,last_success,error) VALUES (%s,CASE WHEN %s IS NULL THEN now() END,%s)
+            conn.execute('''INSERT INTO feed_health(id,last_success,error) VALUES (%s,CASE WHEN %s THEN now() END,%s)
                 ON CONFLICT(id) DO UPDATE SET last_attempt=now(), error=excluded.error,
-                last_success=CASE WHEN excluded.error IS NULL THEN now() ELSE feed_health.last_success END''',(id,error,error))
+                last_success=CASE WHEN excluded.error IS NULL THEN now() ELSE feed_health.last_success END''',(id,error is None,error))
 
     def reserve(self, month, amount):
         import math

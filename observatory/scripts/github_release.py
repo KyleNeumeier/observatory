@@ -4,13 +4,15 @@ import json
 import subprocess
 import urllib.error
 import urllib.request
+import zipfile
+import io
 from pathlib import Path
 
 REPO='KyleNeumeier/observatory'
 
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('action',choices=['fork','status','release','runs']);args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('action',choices=['fork','status','release','runs','jobs','logs']);parser.add_argument('--run-id');args=parser.parse_args()
     result=subprocess.run(['git','credential','fill'],input='protocol=https\nhost=github.com\nusername=KyleNeumeier\n\n',text=True,capture_output=True,check=True)
     credential=dict(line.split('=',1) for line in result.stdout.splitlines() if '=' in line)
     token=credential['password']
@@ -43,6 +45,21 @@ def main():
     elif args.action=='runs':
         r=api('/repos/'+REPO+'/actions/workflows/observatory.yml/runs?per_page=3')
         print(json.dumps([{'id':x['id'],'status':x['status'],'conclusion':x['conclusion'],'url':x['html_url']} for x in (r or {}).get('workflow_runs',[])]))
+    elif args.action=='jobs':
+        if not args.run_id or not args.run_id.isdigit():raise RuntimeError('--run-id is required')
+        r=api(f'/repos/{REPO}/actions/runs/{args.run_id}/jobs')
+        print(json.dumps([{'name':j['name'],'conclusion':j['conclusion'],'url':j['html_url'],
+                          'steps':[{'name':s['name'],'conclusion':s['conclusion'],'number':s['number']} for s in j['steps']]}
+                          for j in (r or {}).get('jobs',[])]))
+    elif args.action=='logs':
+        if not args.run_id or not args.run_id.isdigit():raise RuntimeError('--run-id is required')
+        req=urllib.request.Request(f'https://api.github.com/repos/{REPO}/actions/runs/{args.run_id}/logs',
+            headers={'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','User-Agent':'ObservatoryPortfolio'})
+        with urllib.request.urlopen(req,timeout=120) as response:data=response.read()
+        with zipfile.ZipFile(io.BytesIO(data)) as z:
+            text='\n'.join(z.read(name).decode('utf-8','replace') for name in z.namelist())
+        lines=[line for line in text.splitlines() if '##[error]' in line or 'FAILED' in line or 'ERROR' in line or 'AssertionError' in line]
+        print('\n'.join(lines[-100:]))
     elif args.action=='release':
         r=api('/repos/'+REPO+'/releases/tags/v0.1.0')
         if not r:
