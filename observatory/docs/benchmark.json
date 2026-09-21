@@ -1,0 +1,12 @@
+{
+  "python": "3.12.14",
+  "platform": "Windows",
+  "records": 39599,
+  "anchors": 9367,
+  "full_analysis_seconds": 0.721,
+  "mean_reference_proximity_ms": 3.619,
+  "reference_proximity_iterations": 100,
+  "input_hashes_verified": 64,
+  "reproduces_exactly": true,
+  "note": "Single local run. In-memory great-circle benchmark; not a PostGIS query or cloud latency claim."
+}

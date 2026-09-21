@@ -1,4 +1,11 @@
 node_modules
+.venv/
+__pycache__/
+.pytest_cache/
+dist-observatory/
+observatory/data/raw/
+observatory/data/catalog.json
+observatory/output/
 dist
 # Credential files. `.env` alone is not enough: Vite's loadEnv (see
 # server/standalone/vite.config.js) and scripts/setup-doctor.mjs both read the

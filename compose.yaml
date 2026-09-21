@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: observatory
+      POSTGRES_PASSWORD: observatory
+      POSTGRES_DB: observatory
+    ports: ["127.0.0.1:5432:5432"]
+    volumes:
+      - observatory-db:/var/lib/postgresql/data
+      - ./observatory/backend/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U observatory"]
+      interval: 5s
+      retries: 15
+  api:
+    build:
+      context: .
+      dockerfile: observatory/backend/Dockerfile
+    ports: ["127.0.0.1:8000:8000"]
+    environment:
+      DATABASE_URL: postgresql://observatory:observatory@db:5432/observatory
+      AI_CHAT_ENDPOINT: ${AI_CHAT_ENDPOINT:-}
+      AI_MODEL: ${AI_MODEL:-}
+      AI_API_KEY: ${AI_API_KEY:-}
+      AI_MAX_REQUEST_USD: ${AI_MAX_REQUEST_USD:-0}
+    depends_on:
+      db: {condition: service_healthy}
+  worker:
+    build:
+      context: .
+      dockerfile: observatory/backend/Dockerfile
+    command: ["python", "-m", "observatory.backend.worker"]
+    environment:
+      DATABASE_URL: postgresql://observatory:observatory@db:5432/observatory
+    depends_on:
+      db: {condition: service_healthy}
+volumes:
+  observatory-db:

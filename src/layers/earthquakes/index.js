@@ -12,7 +12,7 @@ export * from './model.js';
 export { createUsgsEarthquakeSource } from './source.js';
 
 /** Own one earthquake display and its refresh lifecycle. */
-export function createEarthquakesLayer({ source, overlayHost } = {}) {
+export function createEarthquakesLayer({ source, overlayHost, symbolScale = 1, opacityScale = 1 } = {}) {
   if (typeof source?.getSnapshot !== 'function')
     throw new TypeError('Earthquakes require a snapshot source');
   if (!overlayHost) throw new TypeError('Earthquakes require an overlay host');
@@ -87,10 +87,10 @@ export function createEarthquakesLayer({ source, overlayHost } = {}) {
           time,
         } of rows) {
           count++;
-          const baseRadius = Math.pow(2, mag) * 1000;
+          const baseRadius = Math.pow(2, mag) * 1000 * symbolScale;
           const color = depthColor(depthKm || 0);
           const isSignificant = mag >= 5.0;
-          const fillAlpha = isSignificant ? 0.4 : 0.3;
+          const fillAlpha = (isSignificant ? 0.4 : 0.3) * opacityScale;
           const outlineAlpha = isSignificant ? 1.0 : 0.8;
 
           const position = Cesium.Cartesian3.fromDegrees(lon, lat);

@@ -1,3 +1,64 @@
+# Observatory
+
+Observatory is an earthquake investigation workspace built as an attributed extension of [God's Eye View](https://github.com/bilawalsidhu/gods-eye-view). It connects USGS events to nearby airports and mapped dams, replays historical sequences, produces evidence-linked briefings, and publishes a reproducible 2021–2025 analysis of subsequent nearby seismic activity.
+
+**[Open the public recorded demo](https://kyle-observatory.active-thyme-9428.chatgpt.site)** · [Architecture and data dictionary](observatory/docs/ARCHITECTURE.md) · [Sources and licensing](observatory/docs/SOURCES.md) · [Interview walkthrough](observatory/docs/WALKTHROUGH.md)
+
+## What I added
+
+- A Python/FastAPI ingestion and analysis service with idempotent event revisions, feed-health tracking, and a documented API.
+- PostgreSQL/PostGIS storage and WGS84 spheroid proximity queries for event-to-infrastructure relationships.
+- A configurable Cesium investigation workspace with synchronized event, map, relationship, and briefing views; local preferences; saved camera regions; watchlists; and JSON import/export.
+- Three fully static recorded cases—Türkiye, Japan's Noto Peninsula, and Taiwan—so the public demo works without credentials, paid APIs, or a hosted database.
+- A five-year statistical experiment over 39,599 USGS records and 9,367 M≥5 anchors, including overlap flags and a 5,909-event sensitivity cohort.
+- Deterministic, citation-bound briefings plus an optional local model mode that may select verified sentences but cannot introduce unsupported measurements or citations.
+- Frozen public-source inputs with request URLs, retrieval dates, and SHA-256 hashes; 30 briefing evaluation cases; unit/API tests; and PostGIS integration checks in CI.
+
+The globe, live global-feed application, and shared earthquake renderer come from God's Eye View. I started from upstream commit [`0dbde1e`](https://github.com/bilawalsidhu/gods-eye-view/commit/0dbde1e36c0177b7664b47702d77ba50f11ddadc). World Monitor, OSIRIS, Skopia, and Aleph were design and research references; no code was copied from those projects.
+
+## Run it
+
+Requires Node.js 24.14+.
+
+```bash
+npm ci
+npm run dev:observatory
+```
+
+Open `http://127.0.0.1:4180`. The recorded cases and research lab run without keys. The original God's Eye View application remains available through `npm run dev` on port 4173.
+
+For local live ingestion, install Docker Desktop and run:
+
+```bash
+docker compose up --build
+```
+
+Then use **Preferences → Load local live backend** in the development workspace. FastAPI documentation is available at `http://127.0.0.1:8000/docs`. Copy `observatory/.env.example` only if you want optional local AI curation. Paid generation is disabled until an endpoint, model, server-side key, and conservative per-request cost ceiling are all configured; monthly reservations stop at $5 UTC.
+
+## Reproduce and verify
+
+The preparation script downloads bounded monthly USGS catalog windows, recursively splits any response that reaches the provider's 20,000-result limit, imports OurAirports and the attributed upstream dam snapshot, and builds the recorded scenarios and experiment.
+
+```bash
+python -m observatory.scripts.prepare
+python -m observatory.scripts.verify_reproduction
+npm run test:observatory
+python -m pytest observatory/tests -q
+npm run build:observatory
+```
+
+Raw frozen inputs and the normalized historical catalog are intentionally excluded from Git because of size. Release `v0.1.0` contains `frozen-inputs.zip`; place its `observatory/` directory at the repository root before running the offline reproduction check. Derived public results and manifests are tracked.
+
+The published study finds weak full-cohort Spearman associations between anchor magnitude and seven-day count (ρ = 0.081) and between depth and seven-day count (ρ = −0.181). The sensitivity cohort produces ρ = 0.176 for magnitude. These are exploratory associations, not causal estimates, forecasts, damage evidence, or automatic aftershock classifications.
+
+## License and attribution
+
+The upstream source remains under its MIT license and copyright. Datasets and assets retain their own terms: USGS; public-domain OurAirports; Natural Earth; and the ODbL dam subset derived from OpenStreetMap/Open Infrastructure Map. Do not describe the combined data bundle as MIT. See [the exact source inventory](observatory/docs/SOURCES.md) and the upstream [LICENSE](LICENSE) and [DATA_SOURCES.md](DATA_SOURCES.md).
+
+---
+
+## Upstream: God's Eye View
+
 <div align="center">
 
 # 🌐 God's Eye View

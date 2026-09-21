@@ -32,6 +32,10 @@
     "visualization"
   ],
   "scripts": {
+    "dev:observatory": "vite --config observatory/vite.config.js",
+    "build:observatory": "vite build --config observatory/vite.config.js",
+    "preview:observatory": "vite preview --config observatory/vite.config.js --host 127.0.0.1 --port 4180",
+    "test:observatory": "node --test observatory/tests/*.test.mjs",
     "doctor": "node scripts/setup-doctor.mjs",
     "format": "node scripts/format.mjs --write",
     "format:check": "node scripts/format.mjs --check",

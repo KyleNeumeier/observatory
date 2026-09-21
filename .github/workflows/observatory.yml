@@ -1,0 +1,30 @@
+name: Observatory checks
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: observatory
+          POSTGRES_PASSWORD: observatory
+          POSTGRES_DB: observatory_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U observatory" --health-interval 5s --health-retries 15
+    env:
+      TEST_DATABASE_URL: postgresql://observatory:observatory@localhost:5432/observatory_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: npm ci --ignore-scripts
+      - run: pip install -r observatory/backend/requirements.txt
+      - run: python -m pytest observatory/tests -q
+      - run: npm run test:observatory
+      - run: npm test
+      - run: npm run check:boundaries
+      - run: npm run build:observatory

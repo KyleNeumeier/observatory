@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="description"
+      content="Explore earthquakes, connected infrastructure and evidence. An open-source geospatial investigation portfolio."
+    />
+    <title>Observatory · Earthquake intelligence</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230d181d'/%3E%3Ccircle cx='32' cy='32' r='21' fill='none' stroke='%23b4efca' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='11' fill='none' stroke='%2370c9db' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='3' fill='%23f58c77'/%3E%3C/svg%3E"
+    />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="./"
+        ><span class="brand-mark">◎</span
+        ><span
+          >OBSERVATORY<small>GLOBAL SIGNALS. LOCAL CONTEXT.</small></span
+        ></a
+      >
+      <nav aria-label="Workspace">
+        <button class="nav active" id="map-tab">Workspace</button
+        ><button class="nav" id="research-tab">
+          Research lab <span>↗</span>
+        </button>
+      </nav>
+      <div class="top-actions">
+        <span class="mode-tag" id="mode-tag">● RECORDED DEMO</span
+        ><button
+          id="settings-toggle"
+          class="icon-button"
+          aria-label="Open preferences"
+        >
+          ⚙
+        </button>
+      </div>
+    </header>
+    <div id="status" class="status" role="status">
+      Loading frozen observations…
+    </div>
+    <main id="workspace">
+      <aside class="left-panel">
+        <div class="section-label">01 / INVESTIGATE</div>
+        <h1>A world in motion.</h1>
+        <p class="muted intro">
+          Follow the event.<br />Understand what’s nearby.
+        </p>
+        <label class="field-label" for="scenario">RECORDED CASE</label
+        ><select id="scenario"></select>
+        <div class="source-line">
+          <span class="signal-dot"></span
+          ><span id="source-status">USGS · frozen catalog revision</span>
+        </div>
+        <div class="section-row">
+          <h2>Seismic activity</h2>
+          <span id="event-count" class="badge">—</span>
+        </div>
+        <label class="search"
+          ><span>⌕</span
+          ><input
+            id="search"
+            placeholder="Filter by location or event ID"
+            aria-label="Filter events"
+        /></label>
+        <div class="filter-row">
+          <label for="min-mag">MIN MAGNITUDE</label
+          ><select id="min-mag">
+            <option value="4.5">M 4.5+</option>
+            <option value="5">M 5.0+</option>
+            <option value="6">M 6.0+</option>
+          </select>
+        </div>
+        <div
+          id="events"
+          class="event-list"
+          aria-label="Earthquake events"
+        ></div>
+        <div class="sidebar-footer">
+          <span class="crosshair">⌖</span>
+          <div>
+            Evidence, not assumptions.<small
+              >Every observation links to its source.</small
+            >
+          </div>
+        </div>
+      </aside>
+      <section class="map-section" aria-label="Interactive earthquake globe">
+        <div id="globe"></div>
+        <div class="map-top">
+          <div class="map-kicker">GEOSPATIAL WORKSPACE <span>/ 3D</span></div>
+          <button id="reset-view" class="map-button">◎ Reset view</button>
+        </div>
+        <div class="map-coordinate" id="coordinates">—</div>
+        <div class="map-legend">
+          <span><i class="dot coral"></i>Earthquakes</span
+          ><span><i class="dot cyan"></i>Airports</span
+          ><span><i class="dot gold"></i>Dams</span
+          ><span><i class="ring"></i>Exposure radius</span>
+        </div>
+        <div class="map-bottom">
+          <div class="timeline-heading">
+            <span>EVENT-TIME REPLAY</span><span id="replay-time">—</span>
+          </div>
+          <div class="timeline-controls">
+            <button id="play" aria-label="Play event replay">▶</button
+            ><input
+              id="replay"
+              type="range"
+              min="0"
+              max="168"
+              value="168"
+              aria-label="Hours after anchor event"
+            /><span id="replay-hours">+168h</span>
+          </div>
+          <p>
+            Retrieved catalog revision · not a reconstruction of knowledge at
+            the time
+          </p>
+        </div>
+        <div id="map-error" hidden>
+          3D rendering unavailable. The event list, evidence and analysis remain
+          usable.
+        </div>
+      </section>
+      <aside class="right-panel" id="inspector">
+        <div class="section-label">02 / CONNECT THE EVIDENCE</div>
+        <div class="event-heading">
+          <span id="selected-mag" class="magnitude">—</span
+          ><span class="type-tag">EARTHQUAKE</span>
+        </div>
+        <h2 id="selected-name" class="selected-title">Loading event</h2>
+        <p id="selected-time" class="muted"></p>
+        <div class="facts">
+          <div><span>DEPTH</span><strong id="depth">—</strong></div>
+          <div>
+            <span>NEARBY ASSETS</span><strong id="nearby-count">—</strong>
+          </div>
+        </div>
+        <div class="radius-line">
+          <label for="radius">Exposure radius</label
+          ><output id="radius-value">100 km</output>
+        </div>
+        <input
+          id="radius"
+          type="range"
+          min="10"
+          max="500"
+          step="10"
+          value="100"
+          aria-label="Exposure radius in kilometers"
+        />
+        <div class="caution">
+          Proximity indicates potential exposure.<br />It does not confirm
+          damage or disruption.
+        </div>
+        <div class="tabs" role="tablist">
+          <button
+            id="assets-tab"
+            class="active"
+            role="tab"
+            aria-selected="true"
+          >
+            Infrastructure</button
+          ><button id="links-tab" role="tab" aria-selected="false">
+            Connections
+          </button>
+        </div>
+        <div id="assets" class="asset-list"></div>
+        <div id="relationships" hidden></div>
+        <section class="briefing">
+          <div class="section-row">
+            <h2>Evidence briefing</h2>
+            <span id="briefing-mode">VERIFIED FACTS</span>
+          </div>
+          <div id="briefing"></div>
+          <button id="generate" hidden>Curate with AI</button>
+        </section>
+        <a
+          id="event-source"
+          class="source-link"
+          target="_blank"
+          rel="noopener noreferrer"
+          >View original USGS record ↗</a
+        >
+      </aside>
+    </main>
+    <section id="research" hidden>
+      <div class="research-heading">
+        <div>
+          <div class="section-label">RESEARCH LAB / 2021–2025</div>
+          <h1>What follows an earthquake?</h1>
+          <p class="muted">
+            A reproducible exploration of magnitude, depth and subsequent nearby
+            activity.
+          </p>
+        </div>
+        <button id="back">← Back to workspace</button>
+      </div>
+      <div class="research-metrics" id="research-metrics"></div>
+      <div class="chart-grid">
+        <article>
+          <h2>Magnitude & subsequent activity</h2>
+          <p class="muted">M≥4.5 events within 100 km in the next 7 days</p>
+          <div id="scatter"></div>
+        </article>
+        <article>
+          <h2>Activity by magnitude band</h2>
+          <p class="muted">Median and interquartile range · 7-day counts</p>
+          <div id="distribution"></div>
+        </article>
+      </div>
+      <article class="method">
+        <h2>Method & limits</h2>
+        <p id="method"></p>
+        <ul id="limitations"></ul>
+        <a href="./data/analysis.json" download>Download results JSON ↗</a>
+        <a href="./data/manifest.json" download>Frozen input manifest ↗</a>
+      </article>
+    </section>
+    <dialog id="settings">
+      <form method="dialog">
+        <div class="section-row">
+          <h2>Your workspace</h2>
+          <button aria-label="Close preferences">✕</button>
+        </div>
+      </form>
+      <p class="muted">
+        Preferences stay in this browser. Export to move them between devices.
+      </p>
+      <label class="check"
+        ><input type="checkbox" id="show-airports" checked /> Airports</label
+      ><label class="check"
+        ><input type="checkbox" id="show-dams" checked /> Dams</label
+      ><label class="check"
+        ><input type="checkbox" id="show-earthquakes" checked /> Earthquake
+        markers</label
+      ><label class="check"
+        ><input type="checkbox" id="show-inspector" checked /> Evidence
+        panel</label
+      >
+      <label class="field-label" for="region-name">SAVE CURRENT VIEW</label>
+      <div class="inline">
+        <input
+          id="region-name"
+          placeholder="Region name"
+          maxlength="60"
+        /><button id="save-region">Save</button>
+      </div>
+      <div id="regions"></div>
+      <h3>Watchlist</h3>
+      <div id="watchlist"></div>
+      <div class="settings-actions">
+        <button id="export">Export preferences</button
+        ><label class="file-button"
+          >Import<input
+            type="file"
+            id="import"
+            accept="application/json"
+            hidden
+        /></label>
+      </div>
+      <div id="personal-controls" hidden>
+        <hr />
+        <button id="live-mode">Load local live backend</button>
+        <p>
+          <a href="http://localhost:4173" target="_blank" rel="noopener"
+            >Open upstream global feeds ↗</a
+          >
+        </p>
+      </div>
+      <p id="settings-status" role="status"></p>
+    </dialog>
+    <footer class="bottom-bar">
+      <span
+        >Built on God’s Eye View <span class="separator">/</span> Original
+        earthquake analytics</span
+      ><span
+        >USGS · OurAirports · © OpenStreetMap contributors / OIM · Natural
+        Earth</span
+      >
+    </footer>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
